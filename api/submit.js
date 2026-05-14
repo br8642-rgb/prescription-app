@@ -17,14 +17,16 @@ export default async function handler(req, res) {
       insuranceTypeEtc: null,
       injectionDrugType: 0,
       period: Number(days),
-      itemList: medicines.map(m => ({
+      itemList: medicines.map((m, i) => ({
         code: m.id,
         name: m.name,
         companyName: m.companyName || '',
-        dosage: null,
+        dailyDose: 1,
+        dosage: 1,
+        routesOfAdministration: m.routesOfAdministration || 1,
+        sortOrder: i,
+        totalDosageDays: Number(days),
         usage: null,
-        count: null,
-        totalCount: null,
       })),
     };
 
