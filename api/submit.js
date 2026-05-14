@@ -8,30 +8,45 @@ export default async function handler(req, res) {
   if (!session || !customerId || !medicines || !days)
     return res.status(400).json({ error: '필수 항목 누락' });
 
-  const payload = {
-    doctorId: 1,
-    customerId,
-    packageId: null,
-    insuranceType: 5,
-    insuranceTypeEtc: null,
-    injectionDrugType: 0,
-    period: days,
-    itemList: medicines.map(m => ({
-      code: m.id,
-      name: m.name,
-      companyName: m.companyName || '',
-    })),
-  };
+  try {
+    const payload = {
+      doctorId: 1,
+      customerId: Number(customerId),
+      packageId: null,
+      insuranceType: 5,
+      insuranceTypeEtc: null,
+      injectionDrugType: 0,
+      period: Number(days),
+      itemList: medicines.map(m => ({
+        code: m.id,
+        name: m.name,
+        companyName: m.companyName || '',
+        dosage: null,
+        usage: null,
+        count: null,
+        totalCount: null,
+      })),
+    };
 
-  const response = await fetch('https://www.1stcrm.co.kr/api/local/v1/prescriptions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      cookie: `SESSION=${session}`,
-    },
-    body: JSON.stringify(payload),
-  });
+    const response = await fetch('https://www.1stcrm.co.kr/api/local/v1/prescriptions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'cookie': `SESSION=${session}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-  const data = await response.json();
-  res.status(200).json(data);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: '서버 오류', detail: data, status: response.status });
+    }
+
+    res.status(200).json(data);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
 }
