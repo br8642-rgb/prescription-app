@@ -13,9 +13,9 @@ export default async function handler(req, res) {
   );
   const data = await response.json();
 
-  // 전화번호로 필터링
   if (phone) {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
+    // 이름은 포함(contains), 전화번호는 정확히 일치
     const filtered = data.content?.filter(c =>
       c.telNumbers?.some(t => t.number.replace(/[^0-9]/g, '') === cleanPhone)
     ) || [];
