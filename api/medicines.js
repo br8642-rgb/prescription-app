@@ -12,5 +12,14 @@ export default async function handler(req, res) {
     { headers: { cookie: `SESSION=${session}` } }
   );
   const data = await response.json();
-  res.status(200).json(data);
+
+  // routesOfAdministration 포함해서 반환
+  const content = (data.content || []).map(m => ({
+    code: m.id,
+    name: m.name,
+    companyName: m.companyName || '',
+    routesOfAdministration: m.routesOfAdministration || 1,
+  }));
+
+  res.status(200).json({ ...data, content });
 }
