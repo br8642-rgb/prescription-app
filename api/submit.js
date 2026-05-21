@@ -24,7 +24,7 @@ export default async function handler(req, res) {
         code: m.id,
         name: m.name,
         companyName: m.companyName || '',
-        dailyDose: m.dailyDose ?? 1,       // 미녹시딜: 0.25 / 0.5, 나머지: 1
+        dailyDose: m.dailyDose != null ? Number(m.dailyDose) : 1,
         dosage: 1,                          // 1일 투여횟수 항상 1
         routesOfAdministration: m.routesOfAdministration || 1,
         sortOrder: i,
