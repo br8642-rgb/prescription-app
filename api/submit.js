@@ -24,8 +24,8 @@ export default async function handler(req, res) {
         code: m.id,
         name: m.name,
         companyName: m.companyName || '',
-        dailyDose: m.dailyDose != null ? Number(m.dailyDose) : 1,
-        dosage: 1,                          // 1일 투여횟수 항상 1
+        dailyDose: 1,
+        dosage: m.dailyDose != null ? Number(m.dailyDose) : 1,
         routesOfAdministration: m.routesOfAdministration || 1,
         sortOrder: i,
         totalDosageDays: Number(m.days) || 30,  // 약품별 복용일수
