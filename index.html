@@ -173,26 +173,26 @@ const QUICK_MEDS = [
   {
     group: "피나스테리드",
     items: [
-      { searchName: "프로페시아", displayName: "프로페시아" },
-      { searchName: "모나시아정", displayName: "모나시아정" },
-      { searchName: "헤어그로",   displayName: "헤어그로"   },
-      { searchName: "피나테드",   displayName: "피나테드"   },
-      { searchName: "피나온정",   displayName: "피나온정"   },
+      { code: "073100130",    searchName: "프로페시아",                        displayName: "프로페시아",  dailyDose: 1 },
+      { code: "8806431004103",searchName: "모나시아정(피나스테리드)",           displayName: "모나시아정", dailyDose: 1 },
+      { code: "C000000008",   searchName: "헤어그로",                          displayName: "헤어그로",   dailyDose: 1 },
+      { code: "8806435034403",searchName: "피나테드정(피나스테리드)",           displayName: "피나테드",   dailyDose: 1 },
+      { code: "057700230",    searchName: "피나온정1mg",                        displayName: "피나온정",   dailyDose: 1 },
     ]
   },
   {
     group: "두타스테리드",
     items: [
-      { searchName: "아보다트", displayName: "아보다트" },
-      { searchName: "두테드",   displayName: "두테드"   },
-      { searchName: "두타원",   displayName: "두타원"   },
+      { code: "650000780",    searchName: "아보다트연질캡슐0.5밀리그램(두타스테리드)", displayName: "아보다트", dailyDose: 1 },
+      { code: "643505870",    searchName: "두테드연질캡슐0.5밀리그램(두타스테리드)",   displayName: "두테드",   dailyDose: 1 },
+      { code: "658107101",    searchName: "두타윈",                                     displayName: "두타윈",   dailyDose: 1 },
     ]
   },
   {
     group: "미녹시딜",
     items: [
-      { code: "00324544",    searchName: "현대미녹시딜정", displayName: "1/4조각", dailyDose: 0.25, companyName: "현대약품" },
-      { code: "00000121111", searchName: "현대미녹시딜정", displayName: "1/2조각", dailyDose: 0.5,  companyName: "현대약품" },
+      { code: "6420011290", searchName: "현대미녹시딜정", displayName: "1/4조각", dailyDose: 0.25, companyName: "현대약품" },
+      { code: "6420011290", searchName: "현대미녹시딜정", displayName: "1/2조각", dailyDose: 0.5,  companyName: "현대약품" },
     ]
   },
 ];
@@ -271,44 +271,17 @@ async function toggleQuickMed(uid, item) {
     return;
   }
 
-  // 코드가 이미 고정된 경우 (미녹시딜)
-  if (item.code) {
-    selectedMedicines.push({
-      _uid: uid,
-      id: item.code,
-      name: item.searchName,
-      displayName: item.displayName,
-      companyName: item.companyName || '',
-      routesOfAdministration: 1,
-      dailyDose: item.dailyDose || 1,
-      days: 30,
-    });
-    renderQuickGroups();
-    renderMedCards();
-    return;
-  }
-
-  // 검색으로 약품 정보 가져오기
-  try {
-    const session = await getSession();
-    const res = await fetch(`/api/medicines?q=${encodeURIComponent(item.searchName)}&session=${session}`);
-    const data = await res.json();
-    const found = (data.content || [])[0];
-    if (!found) { alert(`"${item.searchName}" 약품을 찾을 수 없습니다.`); return; }
-    selectedMedicines.push({
-      _uid: uid,
-      id: found.code,
-      name: found.name,
-      displayName: item.displayName,
-      companyName: found.companyName || '',
-      routesOfAdministration: found.routesOfAdministration || 1,
-      dailyDose: item.dailyDose || 1,
-      days: 30,
-    });
-  } catch(e) {
-    alert('약품 검색 중 오류가 발생했습니다.');
-    return;
-  }
+  // 코드가 있으면 바로 추가 (검색 불필요)
+  selectedMedicines.push({
+    _uid: uid,
+    id: item.code,
+    name: item.searchName,
+    displayName: item.displayName,
+    companyName: item.companyName || '',
+    routesOfAdministration: 1,
+    dailyDose: item.dailyDose || 1,
+    days: 30,
+  });
 
   renderQuickGroups();
   renderMedCards();
