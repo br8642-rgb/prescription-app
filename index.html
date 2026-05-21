@@ -9,15 +9,9 @@
   body { font-family: 'Noto Sans KR', sans-serif; background: #f5f7fa; min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; }
   .container { background: white; border-radius: 16px; padding: 2rem; width: 100%; max-width: 480px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
 
-  /* 헤더 - 뉴헤어 로고 */
   .header { text-align: center; margin-bottom: 2rem; }
-  .newhair-logo { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 10px; }
-  .logo-row { display: flex; align-items: center; gap: 0; }
-  .logo-n-mark { position: relative; width: 36px; height: 36px; margin-right: 2px; }
-  .logo-n-mark svg { width: 36px; height: 36px; }
-  .logo-ewhair { font-size: 28px; font-weight: 900; color: #1a1a1a; letter-spacing: 1px; line-height: 1; }
-  .logo-ewhair .small-i { font-size: 22px; }
-  .logo-sub { font-size: 11px; color: #888; letter-spacing: 0.5px; font-weight: 400; }
+  .logo-img { height: 52px; width: auto; margin-bottom: 8px; }
+  h1 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-top: 6px; }
   h1 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-top: 6px; }
 
   .notice { background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 10px 14px; margin-bottom: 1.5rem; font-size: 13px; color: #e65100; }
@@ -112,19 +106,7 @@
 <body>
 <div class="container">
   <div class="header">
-    <div class="newhair-logo">
-      <div class="logo-row">
-        <!-- 뉴헤어 N 마크 SVG -->
-        <div class="logo-n-mark">
-          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="4,32 4,4 14,4 22,20 22,4 32,4 32,10 24,10 24,32 14,32 6,16 6,32" fill="#D01B1B"/>
-            <polygon points="22,4 32,4 32,32 22,32 22,16 14,32 4,32 4,26 12,10 12,32 22,32" fill="#1a1a1a" opacity="0.85"/>
-          </svg>
-        </div>
-        <span class="logo-ewhair">EWHAiR</span>
-      </div>
-      <span class="logo-sub">뉴헤어모발성형외과의원</span>
-    </div>
+    <img src="/logo.png" alt="뉴헤어모발성형외과의원" class="logo-img">
     <h1>처방전 신청</h1>
   </div>
 
@@ -184,6 +166,38 @@
 </div>
 
 <script>
+// ════════════════════════════════════════════════════
+//  ✏️  자주 처방되는 약 목록 — 여기만 수정하면 됩니다
+// ════════════════════════════════════════════════════
+const QUICK_MEDS = [
+  {
+    group: "피나스테리드",
+    items: [
+      { searchName: "프로페시아", displayName: "프로페시아" },
+      { searchName: "모나시아정", displayName: "모나시아정" },
+      { searchName: "헤어그로",   displayName: "헤어그로"   },
+      { searchName: "피나테드",   displayName: "피나테드"   },
+      { searchName: "피나온정",   displayName: "피나온정"   },
+    ]
+  },
+  {
+    group: "두타스테리드",
+    items: [
+      { searchName: "아보다트", displayName: "아보다트" },
+      { searchName: "두테드",   displayName: "두테드"   },
+      { searchName: "두타원",   displayName: "두타원"   },
+    ]
+  },
+  {
+    group: "미녹시딜",
+    items: [
+      { code: "00324544",    searchName: "현대미녹시딜정", displayName: "1/4조각", dailyDose: 0.25, companyName: "현대약품" },
+      { code: "00000121111", searchName: "현대미녹시딜정", displayName: "1/2조각", dailyDose: 0.5,  companyName: "현대약품" },
+    ]
+  },
+];
+// ════════════════════════════════════════════════════
+
 const UNKNOWN_MED = {
   id: 'UNKNOWN',
   name: '복용약품 기억 안 남 (직원 확인 필요)',
@@ -194,7 +208,6 @@ const UNKNOWN_MED = {
   isUnknown: true,
 };
 
-let quickGroups = [];
 let selectedMedicines = []; // { id, name, displayName, companyName, routesOfAdministration, dailyDose, days, isUnknown }
 let selectedPatient = null;
 let sessionToken = null;
@@ -207,35 +220,23 @@ async function getSession() {
   return sessionToken;
 }
 
-// 자주 처방 약품 로드
-async function loadQuickMeds() {
-  try {
-    const res = await fetch('/quick-meds.json?t=' + Date.now());
-    if (res.ok) {
-      const data = await res.json();
-      quickGroups = Array.isArray(data) ? data : [];
-    }
-  } catch(e) {
-    quickGroups = [];
-  }
-  renderQuickGroups();
-}
+// 자주 처방 약품은 QUICK_MEDS 상수로 관리
 
 function renderQuickGroups() {
   const container = document.getElementById('quickGroups');
   let html = '';
 
-  if (quickGroups.length > 0) {
-    html += quickGroups.map(g => `
+  if (QUICK_MEDS.length > 0) {
+    html += QUICK_MEDS.map(g => `
       <div class="quick-group">
         <div class="quick-group-name">${g.group}</div>
         <div class="quick-btns">
           ${g.items.map(m => {
-            const uid = m.code + '_' + (m.dailyDose || 1);
-            const isSelected = selectedMedicines.find(s => s._uid === uid);
+            const uid = (m.code || m.searchName) + '_' + (m.dailyDose || 1);
+            const isSelected = !!selectedMedicines.find(s => s._uid === uid);
             return `<button class="quick-btn ${isSelected ? 'selected' : ''}" id="qbtn-${uid}"
-              onclick="toggleQuickMed('${uid}', '${m.code}', '${(m.displayName||m.name).replace(/'/g,"\\'")}', '${m.name.replace(/'/g,"\\'")}', '${(m.companyName||'').replace(/'/g,"\\'")}', ${m.routesOfAdministration||1}, ${m.dailyDose||1})">
-              ${isSelected ? '✓ ' : '+ '}${m.displayName || m.name}
+              onclick="toggleQuickMed('${uid}', ${JSON.stringify(m).replace(/"/g, '&quot;')})">
+              ${isSelected ? '✓ ' : '+ '}${m.displayName}
             </button>`;
           }).join('')}
         </div>
@@ -246,7 +247,7 @@ function renderQuickGroups() {
   }
 
   // 기억 안 남 그룹
-  const unknownSelected = selectedMedicines.find(m => m.isUnknown);
+  const unknownSelected = !!selectedMedicines.find(m => m.isUnknown);
   html += `
     <div class="quick-group">
       <div class="quick-group-name" style="color:#e65100;">❓ 기억 안 날 때</div>
@@ -261,22 +262,54 @@ function renderQuickGroups() {
   container.innerHTML = html;
 }
 
-function toggleQuickMed(uid, code, displayName, name, companyName, routesOfAdministration, dailyDose) {
+async function toggleQuickMed(uid, item) {
   const existing = selectedMedicines.find(m => m._uid === uid);
   if (existing) {
     selectedMedicines = selectedMedicines.filter(m => m._uid !== uid);
-  } else {
+    renderQuickGroups();
+    renderMedCards();
+    return;
+  }
+
+  // 코드가 이미 고정된 경우 (미녹시딜)
+  if (item.code) {
     selectedMedicines.push({
       _uid: uid,
-      id: code,
-      name,
-      displayName,
-      companyName,
-      routesOfAdministration,
-      dailyDose,
+      id: item.code,
+      name: item.searchName,
+      displayName: item.displayName,
+      companyName: item.companyName || '',
+      routesOfAdministration: 1,
+      dailyDose: item.dailyDose || 1,
       days: 30,
     });
+    renderQuickGroups();
+    renderMedCards();
+    return;
   }
+
+  // 검색으로 약품 정보 가져오기
+  try {
+    const session = await getSession();
+    const res = await fetch(`/api/medicines?q=${encodeURIComponent(item.searchName)}&session=${session}`);
+    const data = await res.json();
+    const found = (data.content || [])[0];
+    if (!found) { alert(`"${item.searchName}" 약품을 찾을 수 없습니다.`); return; }
+    selectedMedicines.push({
+      _uid: uid,
+      id: found.code,
+      name: found.name,
+      displayName: item.displayName,
+      companyName: found.companyName || '',
+      routesOfAdministration: found.routesOfAdministration || 1,
+      dailyDose: item.dailyDose || 1,
+      days: 30,
+    });
+  } catch(e) {
+    alert('약품 검색 중 오류가 발생했습니다.');
+    return;
+  }
+
   renderQuickGroups();
   renderMedCards();
 }
@@ -501,7 +534,7 @@ document.addEventListener('click', e => {
   }
 });
 
-loadQuickMeds();
+renderQuickGroups();
 </script>
 </body>
 </html>
